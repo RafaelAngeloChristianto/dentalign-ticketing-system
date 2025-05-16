@@ -6,6 +6,8 @@ import Services from './pages/Services'
 import Articles from './pages/Articles'
 import Contact from './pages/Contact'
 import AdminDashboard from './pages/AdminDashboard'
+import SignIn from './pages/SignIn'
+import SignUp from './pages/SignUp'
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
       <Route path='/articles' element={<Articles />} />
       <Route path='/contact' element={<Contact />} />
       <Route path='/AdminDashboard' element={<AdminDashboard />} />
+      <Route path='/signin' element={<SignIn/>}/>
+      <Route path='/signup' element={<SignUp/>}/>
     </Routes>
   )
 }
