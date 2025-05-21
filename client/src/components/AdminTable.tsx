@@ -1,8 +1,10 @@
 import React from "react";
 import AdminTicket from "./AdminTicket";
+import { Ticket } from "../../../server/models/TicketModel";
 
 const AdminTable = () => {
-  const tickets = [
+
+  const tickets:Ticket[] = [
     {
       id: "DENT-1001",
       title: "Patient Records System Error",
@@ -32,18 +34,25 @@ const AdminTable = () => {
     },
   ];
 
+  const styles = {
+    container: "overflow-x-auto mt-4 px-4",
+    table : "min-w-full text-left border-collapse",
+    header: "bg-gray-100 text-gray-600 text-sm font-semibold border-b",
+    headerData: "py-3 px-4"
+  }
+
   return (
-    <div className="overflow-x-auto mt-4 px-4">
-      <table className="min-w-full text-left border-collapse">
-        <thead className="bg-gray-100 text-gray-600 text-sm font-semibold border-b">
+    <div className={styles.container}>
+      <table className={styles.table}>
+        <thead className={styles.header}>
           <tr>
-            <th className="py-3 px-4">Ticket ID</th>
-            <th className="py-3 px-4">Title</th>
-            <th className="py-3 px-4">Assignee</th>
-            <th className="py-3 px-4">Type</th>
-            <th className="py-3 px-4">Date Created</th>
-            <th className="py-3 px-4">Priority</th>
-            <th className="py-3 px-4">Status</th>
+            <th className={styles.headerData}>Ticket ID</th>
+            <th className={styles.headerData}>Title</th>
+            <th className={styles.headerData}>Assignee</th>
+            <th className={styles.headerData}>Type</th>
+            <th className={styles.headerData}>Date Created</th>
+            <th className={styles.headerData}>Priority</th>
+            <th className={styles.headerData}>Status</th>
           </tr>
         </thead>
         <tbody>

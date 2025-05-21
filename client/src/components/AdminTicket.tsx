@@ -1,13 +1,14 @@
 import React from "react";
+import { PriorityType, StatusType } from "../../../server/models/TicketModel";
 
-type TicketProps = {
-  id: string;
-  title: string;
-  assignee: string;
-  type: string;
-  dateCreated: string;
-  priority: "High" | "Medium" | "Low";
-  status: "In Progress" | "Completed" | "Unseen";
+interface TicketProps { 
+  id          : string
+  title       : string
+  assignee    : string
+  type        : string
+  dateCreated : string
+  priority    : PriorityType
+  status      : StatusType
 };
 
 const AdminTicket: React.FC<TicketProps> = ({ id, title, assignee, type, dateCreated, priority, status }) => {
