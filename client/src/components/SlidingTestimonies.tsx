@@ -9,7 +9,7 @@ const SlidingTestimonies = () => {
             setCurrent((prev) => (prev + 1) % testimonies.length);
         }, 5000)
         return () => clearInterval(interval);
-    }, []);
+    });
     const testimonies = [
         {
             text: "I highly recommend this, Dr Melinda is an excellent dentist whose always making her patients are comfortable and get the best solution she can offer. Not only she take a good care of my teeth but she also make me understand about the importance of oral health. I will definitely recommend this place to my family and friends.",
