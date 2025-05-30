@@ -1,19 +1,24 @@
 import express from "express";
-import { connectToMongo } from "../mongoClient.ts";
+import dotenv from "dotenv";
+import { connectToMongo } from "./config/mongoClient";
+import todoRoutes from "./routes/todoRoutes";
+
+dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-app.get("/", async (req, res) => {
+app.use(express.json());
+
+// Routes
+app.use("/api/todos", todoRoutes);
+
+// Start server
+app.listen(PORT, async () => {
   try {
-    const db = await connectToMongo();
-    const data = await db.collection("test").find({}).toArray();
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to connect to MongoDB" });
+    await connectToMongo();
+    console.log(`Server running at http://localhost:${PORT}`);
+  } catch (err) {
+    console.error("MongoDB connection failed", err);
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
 });
