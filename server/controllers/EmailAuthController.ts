@@ -1,9 +1,12 @@
-const nodemailer = require('nodemailer');
-const dotenv = require('dotenv');
+// const nodemailer = require('nodemailer');
+// const dotenv = require('dotenv');
+
+import nodemailer from 'nodemailer'
+import dotenv from 'dotenv'
 
 dotenv.config();
 
-const userSendMail = (to, otp, titleTxt, res) => {
+const userSendMail = (to:string, otp:any, titleTxt:string, _res:Response) => {
     let config = {
         service: 'gmail',
         auth: {
@@ -48,4 +51,4 @@ const userSendMail = (to, otp, titleTxt, res) => {
     });
 }
 
-module.exports = { userSendMail };
+export { userSendMail };

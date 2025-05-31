@@ -1,26 +1,30 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../models/UserModel');  // no .js extension in CommonJS
-const { userSendMail } = require('./userSendMail');  // destructure if ed as object
+// const bcrypt = require('bcrypt');
+// const jwt = require('jsonwebtoken');
+// const User = require('../models/UserModel.ts');  // no .js extension in CommonJS
+// const { userSendMail } = require('./userSendMail');  // destructure if ed as object
 
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import { User } from '../models/UserModel'
+import { userSendMail } from './EmailAuthController';
 
 // Helpers
-function isMatch(password, confirmPassword) {
+function isMatch(password:any, confirmPassword:any) {
   return password === confirmPassword;
 }
 
-function validateEmail(email) {
+function validateEmail(email:string) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 }
 
-function validatePassword(password) {
+function validatePassword(password:any) {
   const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
   return re.test(password);
 }
 
-function createRefreshToken(payload) {
-  return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
+function createRefreshToken(payload:any) {
+  return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET as string, { expiresIn: '1d' });
 }
 
 // Cleanup expired unverified accounts
@@ -38,14 +42,8 @@ const cleanupExpiredAccounts = async () => {
 };
 
 // Register User
-const signUp = async (req, res) => {
+const signUp = async (req:any, res:any) => {
   try {
-    // Clean up expired unverified accounts before processing new registration
-    await User.deleteMany({
-      isVerified: false,
-      otpExpires: { $lt: new Date() }
-    });
-  
     const { userName, email, password, confirmPassword, phoneNumber } = req.body;
 
     if (!userName || !email || !password || !confirmPassword)
@@ -78,19 +76,19 @@ const signUp = async (req, res) => {
 
     await newUser.save();
 
-    await userSendMail(email, otp, 'Verify your email address');
+    await userSendMail(email, otp, 'Verify your email address', res);
 
     res.json({ 
       message: 'Registration successful. Check your email for OTP. You have 10 minutes to verify your account.',
       expiresIn: '10 minutes'
     });
-  } catch (error) {
+  } catch (error:any) {
     res.status(500).json({ message: error.message });
   }
 };
 
 // Email Verification
-const verifyOtp = async (req, res) => {
+const verifyOtp = async (req:any, res:any) => {
   try {
     const { email, otp } = req.body;
     
@@ -107,7 +105,7 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: 'Account is already verified.' });
     }
 
-    if (user.otpExpires < Date.now()) {
+    if ((user.otpExpires as NativeDate).getTime() < Date.now()) {
       // Delete the expired unverified account
       await User.findByIdAndDelete(user._id);
       return res.status(400).json({ message: 'OTP has expired. Please register again.' });
@@ -123,13 +121,13 @@ const verifyOtp = async (req, res) => {
     await user.save();
 
     res.json({ message: 'Email verified successfully!' });
-  } catch (error) {
+  } catch (error:any) {
     res.status(500).json({ message: error.message });
   }
 };
 
 // Resend OTP
-const resendOtp = async (req, res) => {
+const resendOtp = async (req:any, res:any) => {
   try {
     const { email } = req.body;
     
@@ -151,19 +149,19 @@ const resendOtp = async (req, res) => {
     user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
 
-    await userSendMail(email, otp, 'Your new OTP code');
+    await userSendMail(email, otp, 'Your new OTP code', res);
 
     res.json({ 
       message: 'New OTP sent successfully. You have 10 minutes to verify your account.',
       expiresIn: '10 minutes'
     });
-  } catch (error) {
+  } catch (error:any) {
     res.status(500).json({ message: error.message });
   }
 };
 
 // Login
-const signIn = async (req, res) => {
+const signIn = async (req:any, res:any) => {
   try {
     const { email, password } = req.body;
     if (!email || !password)
@@ -172,26 +170,10 @@ const signIn = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid credentials.' });
 
-     if (!user.isVerified) {
-      // Generate new OTP and send email
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      user.otp = otp;
-      user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
-      await user.save();
-
-      await userSendMail(email, otp, 'Verify your email address');
-
-      return res.status(403).json({ 
-        message: 'Please verify your email first.',
-        needsVerification: true,
-        email: email
-      });
-    }
-
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.REFRESH_TOKEN_SECRET, {
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.REFRESH_TOKEN_SECRET as string, {
       expiresIn: '1d',
     });
 
@@ -213,24 +195,24 @@ const signIn = async (req, res) => {
         role: user.role,
       },
     });
-  } catch (error) {
+  } catch (error:any) {
     res.status(500).json({ message: error.message });
   }
 };
 
 // Get user info
-const userInfor = async (req, res) => {
+const userInfor = async (req:any, res:any) => {
   try {
     const userId = req.user.id;
     const user = await User.findById(userId).select('-password');
     res.json(user);
-  } catch (error) {
+  } catch (error:any) {
     res.status(500).json({ message: error.message });
   }
 };
 
 // Update user (by user)
-const updateUser = async (req, res) => {
+const updateUser = async (req:any, res:any) => {
   try {
     const userId = req.user.id;
     const updates = req.body;
@@ -243,13 +225,13 @@ const updateUser = async (req, res) => {
     if (!updatedUser) return res.status(404).json({ message: 'User not found.' });
 
     res.json({ message: 'User updated successfully.', user: updatedUser });
-  } catch (error) {
+  } catch (error:any) {
     res.status(500).json({ message: error.message });
   }
 };
 
 // Admin: Add User
-const addUser = async (req, res) => {
+const addUser = async (req:any, res:any) => {
   try {
     const { userName, email, password, phoneNumber, role } = req.body;
 
@@ -273,13 +255,13 @@ const addUser = async (req, res) => {
       message: 'User added by admin',
       user: { id: newUser._id, email: newUser.email, role: newUser.role },
     });
-  } catch (error) {
+  } catch (error:any) {
     res.status(500).json({ message: error.message });
   }
 };
 
 // Delete user
-const deleteUser = async (req, res) => {
+const deleteUser = async (req:any, res:any) => {
   try {
     const userId = req.user.id;
     const deletedUser = await User.findByIdAndDelete(userId);
@@ -287,12 +269,12 @@ const deleteUser = async (req, res) => {
     if (!deletedUser) return res.status(404).json({ message: 'User not found.' });
 
     res.json({ message: 'User deleted successfully.' });
-  } catch (error) {
+  } catch (error:any) {
     res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = {
+export {
   signUp,
   verifyOtp,
   resendOtp,
