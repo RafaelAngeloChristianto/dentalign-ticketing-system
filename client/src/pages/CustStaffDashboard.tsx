@@ -82,7 +82,7 @@ function CustStaffDashboard() {
     return (
         <div>
             <header>
-                <DashboardHeader />
+                <DashboardHeader isAdmin={false}/>
             </header>
             <main>
                 <section className='flex flex-row justify-between items-center'>

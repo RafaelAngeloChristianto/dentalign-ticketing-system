@@ -3,7 +3,11 @@ import logo from '../assets/text-logo.png'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
 
-const DashboardHeader = () => {
+interface Props {
+    isAdmin: boolean;
+}
+
+const DashboardHeader: React.FC<Props> = ({ isAdmin }) => {
     const styles = {
         container : 'flex flex-row justify-between items-center px-5 py-3 mb-3 border-b-2 border-neutral-200',
         logo_image: 'w-70',
@@ -12,7 +16,9 @@ const DashboardHeader = () => {
     return (
         <header className={styles.container}>
             <img className={styles.logo_image} src={logo} alt="" />
-            <button className={styles.profile_btn}><FontAwesomeIcon icon={faUser} /></button>
+            {!isAdmin && (
+                <button className={styles.profile_btn}><FontAwesomeIcon icon={faUser} /></button>
+            )}
         </header>
     )
 }
