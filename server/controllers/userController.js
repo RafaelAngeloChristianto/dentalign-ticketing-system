@@ -40,6 +40,12 @@ const cleanupExpiredAccounts = async () => {
 // Register User
 const signUp = async (req, res) => {
   try {
+    // Clean up expired unverified accounts before processing new registration
+    await User.deleteMany({
+      isVerified: false,
+      otpExpires: { $lt: new Date() }
+    });
+  
     const { userName, email, password, confirmPassword, phoneNumber } = req.body;
 
     if (!userName || !email || !password || !confirmPassword)
@@ -165,6 +171,22 @@ const signIn = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid credentials.' });
+
+     if (!user.isVerified) {
+      // Generate new OTP and send email
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      user.otp = otp;
+      user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+      await user.save();
+
+      await userSendMail(email, otp, 'Verify your email address');
+
+      return res.status(403).json({ 
+        message: 'Please verify your email first.',
+        needsVerification: true,
+        email: email
+      });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });

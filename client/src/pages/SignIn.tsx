@@ -32,6 +32,14 @@ const SignIn: React.FC = () => {
         password: formData.password,
       });
 
+      // Check if user needs verification
+      if (response.needsVerification) {
+        // Store email in localStorage for OTP verification
+        localStorage.setItem("verificationEmail", response.email);
+        navigate("/verify-email");
+        return;
+      }
+
       // Store token in localStorage if remember me is checked
       if (formData.rememberMe) {
         localStorage.setItem("token", response.token);
@@ -47,7 +55,22 @@ const SignIn: React.FC = () => {
       }
     } catch (err) {
       const error = err as AxiosError<ApiErrorResponse>;
-      setError(error.response?.data?.message || "Invalid email or password");
+         // Check if the error is an Axios error with a response
+      if (error.response) {
+        // Check if the status is 403 and needsVerification is true
+        if (error.response.status === 403 && error.response.data?.needsVerification) {
+          // Store email in localStorage for OTP verification
+          localStorage.setItem("verificationEmail", error.response.data.email || formData.email);
+          navigate("/verify-email");
+          return;
+        } else {
+          // For other API errors with a response, display the server's message
+          setError(error.response.data?.message || "An error occurred during sign in");
+        }
+      } else {
+        // For network errors or other issues without a response
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }

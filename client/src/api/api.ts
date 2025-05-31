@@ -2,8 +2,10 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:3000/service/user';
 
-interface ApiErrorResponse {
+export interface ApiErrorResponse {
   message: string;
+  needsVerification?: boolean;
+  email?: string;
 }
 
 const api = axios.create({
@@ -44,5 +46,4 @@ export const authService = {
   },
 };
 
-export type { ApiErrorResponse };
 export default api; 
