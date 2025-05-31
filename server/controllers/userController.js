@@ -23,6 +23,20 @@ function createRefreshToken(payload) {
   return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
 }
 
+// Cleanup expired unverified accounts
+const cleanupExpiredAccounts = async () => {
+  try {
+    const result = await User.deleteMany({
+      isVerified: false,
+      otpExpires: { $lt: new Date() }
+    });
+    return result;
+  } catch (error) {
+    console.error('Error cleaning up expired accounts:', error);
+    return null;
+  }
+};
+
 // Register User
 const signUp = async (req, res) => {
   try {
@@ -53,13 +67,17 @@ const signUp = async (req, res) => {
       phoneNumber,
       otp,
       otpExpires,
+      isVerified: false
     });
 
     await newUser.save();
 
     await userSendMail(email, otp, 'Verify your email address');
 
-    res.json({ message: 'Registration successful. Check your email for OTP.' });
+    res.json({ 
+      message: 'Registration successful. Check your email for OTP. You have 10 minutes to verify your account.',
+      expiresIn: '10 minutes'
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -69,10 +87,29 @@ const signUp = async (req, res) => {
 const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
+    
+    // First cleanup any expired accounts
+    await cleanupExpiredAccounts();
+    
     const user = await User.findOne({ email });
+    
+    if (!user) {
+      return res.status(400).json({ message: 'Account not found or has expired. Please register again.' });
+    }
 
-    if (!user || user.otp !== otp || user.otpExpires < Date.now())
-      return res.status(400).json({ message: 'Invalid or expired OTP.' });
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'Account is already verified.' });
+    }
+
+    if (user.otpExpires < Date.now()) {
+      // Delete the expired unverified account
+      await User.findByIdAndDelete(user._id);
+      return res.status(400).json({ message: 'OTP has expired. Please register again.' });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP.' });
+    }
 
     user.otp = null;
     user.otpExpires = null;
@@ -89,8 +126,19 @@ const verifyOtp = async (req, res) => {
 const resendOtp = async (req, res) => {
   try {
     const { email } = req.body;
+    
+    // First cleanup any expired accounts
+    await cleanupExpiredAccounts();
+    
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'User not found' });
+    
+    if (!user) {
+      return res.status(400).json({ message: 'Account not found or has expired. Please register again.' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'Account is already verified.' });
+    }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.otp = otp;
@@ -99,7 +147,10 @@ const resendOtp = async (req, res) => {
 
     await userSendMail(email, otp, 'Your new OTP code');
 
-    res.json({ message: 'New OTP sent successfully.' });
+    res.json({ 
+      message: 'New OTP sent successfully. You have 10 minutes to verify your account.',
+      expiresIn: '10 minutes'
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
