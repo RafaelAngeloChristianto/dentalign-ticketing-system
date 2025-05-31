@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cloudflared access tcp --hostname mongodb.csbihub.id --url localhost:27018"
+    "db": "cloudflared access tcp --hostname mongodb.csbihub.id --url localhost:27018",
+    "server": "nodemon ./server.js",
+    "start": "concurrently \"npm run db\" \"npm run server\" "
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,7 @@
     "mongodb": "^6.16.0",
     "mongoose": "^8.15.1",
     "nodemailer": "^7.0.3",
+    "nodemon": "^3.1.10",
     "react-router-dom": "^7.6.1"
   },
   "devDependencies": {

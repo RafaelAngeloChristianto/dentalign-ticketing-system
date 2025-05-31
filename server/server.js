@@ -1,3 +1,10 @@
+// import express from 'express'
+// import dotenv from 'dotenv'
+// import cors from 'cors'
+
+// import connectToMongo from './config/mongoClient'
+// import usersRoute from './routes/userRoutes'
+
 const express = require('express');
 const dotenv = require('dotenv');
 const { connectToMongo } = require('./config/mongoClient');
@@ -14,9 +21,14 @@ app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true // if you're using cookies or auth headers
 }));
-
 app.use(express.json());
+
 app.use('/service/user', usersRoute);
+
+// Make sure server is running
+app.get('/', (req, res) => {
+  res.send('Server is working!');
+});
 
 // Start server
 app.listen(PORT, async () => {
