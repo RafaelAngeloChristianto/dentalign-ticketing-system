@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "db": "cloudflared access tcp --hostname mongodb.csbihub.id --url localhost:27018",
-    "server": "nodemon ./server.js",
+    "server": "nodemon -x \"ts-node --project ../tsconfig.node.json\" server.ts",
     "start": "concurrently \"npm run db\" \"npm run server\" "
   },
   "repository": {
@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/Frahyang/WADS-FP-FARK.net#readme",
   "dependencies": {
-    "@react-oauth/google": "^0.12.2",
     "axios": "^1.9.0",
     "bcrypt": "^6.0.0",
     "concurrently": "^9.1.2",
@@ -35,9 +34,11 @@
     "mongoose": "^8.15.1",
     "nodemailer": "^7.0.3",
     "nodemon": "^3.1.10",
-    "react-router-dom": "^7.6.1"
+    "react-router-dom": "^7.6.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.27",
     "ts-node": "^10.9.2",

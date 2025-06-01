@@ -3,11 +3,11 @@ import TicketsTable from '../components/TicketsTable'
 import DashboardHeader from '../components/DashboardHeader'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass, faChevronDown, faCalendar, faCircle } from '@fortawesome/free-solid-svg-icons'
-import { Ticket } from '../../../server/models/TicketModel'
+import { DummyTicket } from '../../../server/models/TicketModel'
 import DashboardNav from '../components/DashboardNav'
 
 function CustStaffDashboard() {
-    const tickets:Ticket[] = [
+    const tickets:DummyTicket[] = [
         {
             id: "DENT-1001",
             title: "Patient Records System Error",
@@ -82,7 +82,7 @@ function CustStaffDashboard() {
     return (
         <div>
             <header>
-                <DashboardHeader />
+                <DashboardHeader isAdmin={false}/>
             </header>
             <main>
                 <section className='flex flex-row justify-between items-center'>

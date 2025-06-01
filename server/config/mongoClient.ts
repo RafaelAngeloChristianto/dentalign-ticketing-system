@@ -1,17 +1,20 @@
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+// const mongoose = require('mongoose');
+// const dotenv = require('dotenv');
+
+import mongoose from 'mongoose'
+import dotenv from 'dotenv'
 
 dotenv.config();
 
-const uri = process.env.MONGO_URI;
+const URI = process.env.MONGO_URI;
 
-if (!uri) {
+if (!URI) {
   throw new Error('MONGO_URI is not defined in .env');
 }
 
 async function connectToMongo() {
   try {
-    await mongoose.connect(uri);
+    await mongoose.connect(URI as string);
     console.log('MongoDB connected successfully using Mongoose');
   } catch (error) {
     console.error('MongoDB connection error:', error);
@@ -19,4 +22,4 @@ async function connectToMongo() {
   }
 }
 
-module.exports = { connectToMongo };
+export { connectToMongo }

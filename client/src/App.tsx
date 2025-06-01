@@ -6,6 +6,7 @@ import Services from './pages/Services'
 import Articles from './pages/Articles'
 import Contact from './pages/Contact'
 import AdminDashboard from './pages/AdminDashboard'
+import AdminDashboardSummary from './pages/AdminDashboardSummary'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import CustStaffDashboard from './pages/CustStaffDashboard'
@@ -21,6 +22,7 @@ function App() {
       <Route path='/contact' element={<Contact />} />
       <Route path='/tickets' element={<CustStaffDashboard />} />
       <Route path='/admin' element={<AdminDashboard />} />
+      <Route path='/admin/summary' element={<AdminDashboardSummary />} />
       <Route path='/signin' element={<SignIn/>}/>
       <Route path='/signup' element={<SignUp/>}/>
       <Route path='/verify-email' element={<OTPVerification/>}/>

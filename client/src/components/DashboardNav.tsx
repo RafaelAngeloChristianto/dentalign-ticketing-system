@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 
 interface Props {
     navs: {
@@ -9,21 +11,61 @@ interface Props {
 
 const DashboardNav:React.FC<Props> = ({ navs }) => {
     const [current, setCurrent] = useState(0)
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
     const styles = {
-        container: 'w-fit py-1',
-        navItem: 'font-semibold hover:font-bold w-30 py-2 mx-2 hover:bg-indigo-100 hover:text-indigo-500 hover:rounded-xl cursor-pointer transition-all ',
-        selected: 'border-b-2 border-indigo-500 text-indigo-500'
+        container: 'w-full py-1 px-2 sm:px-4 relative',
+        navList: 'hidden md:flex flex-nowrap gap-2 sm:gap-4',
+        navItem: 'font-semibold hover:font-bold py-2 px-3 sm:px-4 hover:bg-indigo-100 hover:text-indigo-500 hover:rounded-xl cursor-pointer transition-all whitespace-nowrap',
+        selected: 'border-b-2 border-indigo-500 text-indigo-500',
+        mobileMenuButton: 'md:hidden absolute right-4 top-2 text-2xl text-gray-600 hover:text-indigo-500 transition-colors z-50',
+        mobileMenu: 'md:hidden fixed top-12 right-4 bg-white shadow-lg rounded-lg py-1 z-40 min-w-[200px] divide-y divide-gray-100',
+        mobileNavItem: 'block w-full text-left px-4 py-2 hover:bg-indigo-50 hover:text-indigo-500 transition-colors font-semibold',
+        mobileSelected: 'bg-indigo-50 text-indigo-500'
     }
 
-    const onClick = (id, func:()=>void) => {
+    const onClick = (id: number, func:()=>void) => {
         setCurrent(id)
         if(func) func()
+        setIsMobileMenuOpen(false)
     }
 
     return (
         <nav className={styles.container}>
-            {navs.map((nav, i) => 
-                <button className={styles.navItem + (i == current ? styles.selected : "")} onClick={() => onClick(i, nav.func)}>{nav.option}</button>
+            <button 
+                className={styles.mobileMenuButton}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Toggle mobile menu"
+            >
+                <FontAwesomeIcon icon={isMobileMenuOpen ? faTimes : faBars} />
+            </button>
+
+            {/* Desktop Navigation */}
+            <div className={styles.navList}>
+                {navs.map((nav, i) => 
+                    <button 
+                        key={i}
+                        className={styles.navItem + (i === current ? " " + styles.selected : "")} 
+                        onClick={() => onClick(i, nav.func)}
+                    >
+                        {nav.option}
+                    </button>
+                )}
+            </div>
+
+            {/* Mobile Navigation */}
+            {isMobileMenuOpen && (
+                <div className={styles.mobileMenu}>
+                    {navs.map((nav, i) => 
+                        <button 
+                            key={i}
+                            className={styles.mobileNavItem + (i === current ? " " + styles.mobileSelected : "")} 
+                            onClick={() => onClick(i, nav.func)}
+                        >
+                            {nav.option}
+                        </button>
+                    )}
+                </div>
             )}
         </nav>
     )
