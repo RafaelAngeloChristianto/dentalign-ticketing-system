@@ -17,7 +17,7 @@ interface Props {
     priority: PriorityType;
     status: StatusType;
   };
-  onUpdate?: (ticketId: string, updates: { status?: StatusType; priority?: PriorityType }) => Promise<void>;
+  onUpdate?: (ticketId: string, updates: { status?: StatusType; priority?: PriorityType; assignee?: string }) => Promise<void>;
   onDelete?: (ticketId: string) => Promise<void>;
 }
 
@@ -25,22 +25,29 @@ const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket, onUpdate, 
   const [isEditing, setIsEditing] = useState(false);
   const [editedStatus, setEditedStatus] = useState<StatusType>(ticket.status);
   const [editedPriority, setEditedPriority] = useState<PriorityType>(ticket.priority);
+  const [editedAssignee, setEditedAssignee] = useState<string>(ticket.assignee);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  React.useEffect(() => {
+    setEditedStatus(ticket.status);
+    setEditedPriority(ticket.priority);
+    setEditedAssignee(ticket.assignee);
+  }, [ticket]);
 
   const handleSave = async () => {
     setIsUpdating(true);
     try {
+      const updates: { status?: StatusType; priority?: PriorityType; assignee?: string } = {
+        status: editedStatus,
+        priority: editedPriority,
+        assignee: editedAssignee,
+      };
+
       if (onUpdate) {
-        await onUpdate(ticket.id, {
-          status: editedStatus,
-          priority: editedPriority
-        });
+        await onUpdate(ticket.id, updates);
       } else {
-        await ticketService.updateTicket(ticket.id, {
-          status: editedStatus,
-          priority: editedPriority
-        });
+        await ticketService.updateTicket(ticket.id, updates);
       }
       setIsEditing(false);
     } catch (error) {
@@ -174,7 +181,7 @@ const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket, onUpdate, 
               Ticket Details
             </h3>
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">
                     <Settings size={12} />
@@ -191,17 +198,26 @@ const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket, onUpdate, 
                 </div>
                 <div>
                   <span className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">
-                    <User size={12} />
-                    Assignee
-                  </span>
-                  <p className="text-gray-900 font-medium">{ticket.assignee}</p>
-                </div>
-                <div>
-                  <span className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">
                     <FileText size={12} />
                     Type
                   </span>
                   <p className="text-gray-900 font-medium">{ticket.type}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">
+                    <User size={12} />
+                    Assignee
+                  </span>
+                   {isEditing ? (
+                    <input
+                      type="text"
+                      value={editedAssignee}
+                      onChange={(e) => setEditedAssignee(e.target.value)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-gray-900 font-medium text-sm"
+                    />
+                  ) : (
+                    <p className="text-gray-900 font-medium">{ticket.assignee}</p>
+                  )}
                 </div>
               </div>
               
