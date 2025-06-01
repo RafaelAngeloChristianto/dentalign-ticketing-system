@@ -1,6 +1,8 @@
+import userController from '../controllers/UserController'
+
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/userController');
+// const userController = require('../controllers/userController');
 const { googleSignIn } = require('../controllers/googleAuth');
 
 router.post('/signup', userController.signUp);

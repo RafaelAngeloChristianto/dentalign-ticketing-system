@@ -3,23 +3,24 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 
 import { connectToMongo } from './config/mongoClient'
-import usersRoute from './routes/UserRoutes'
+import usersRoute from './routes/userRoutes'
 import ticketRoute from './routes/TicketRoutes'
+import authRoutes from './routes/authRoutes'
 
-<<<<<<< HEAD:server/server.js
-const express = require('express');
-const dotenv = require('dotenv');
-const { connectToMongo } = require('./config/mongoClient');
-const usersRoute = require('./routes/userRoutes');
-const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
-=======
+// <<<<<<< HEAD:server/server.js
 // const express = require('express');
 // const dotenv = require('dotenv');
 // const { connectToMongo } = require('./config/mongoClient');
 // const usersRoute = require('./routes/userRoutes');
 // const cors = require('cors');
->>>>>>> 63ac826ca25b3ba21a7dc3d4cfb14663173710e1:server/server.ts
+// const authRoutes = require('./routes/authRoutes');
+// =======
+// // const express = require('express');
+// // const dotenv = require('dotenv');
+// // const { connectToMongo } = require('./config/mongoClient');
+// // const usersRoute = require('./routes/userRoutes');
+// // const cors = require('cors');
+// >>>>>>> 63ac826ca25b3ba21a7dc3d4cfb14663173710e1:server/server.ts
 
 dotenv.config();
 
