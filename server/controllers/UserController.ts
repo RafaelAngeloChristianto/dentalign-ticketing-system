@@ -8,6 +8,18 @@ import jwt from 'jsonwebtoken'
 import { User } from '../models/UserModel'
 import { userSendMail } from './EmailAuthController';
 
+// Schedule cleanup task to run every hour
+setInterval(async () => {
+  try {
+    const result = await cleanupExpiredAccounts();
+    if (result) {
+      console.log(`Cleaned up ${result.deletedCount} expired unverified accounts`);
+    }
+  } catch (error) {
+    console.error('Error in scheduled cleanup:', error);
+  }
+}, 60 * 60 * 1000); // Run every hour
+
 // Helpers
 function isMatch(password:any, confirmPassword:any) {
   return password === confirmPassword;
@@ -55,6 +67,9 @@ const signUp = async (req:any, res:any) => {
       return res.status(400).json({ message: 'Password must be 6–20 chars with upper, lower, number.' });
 
     if (!isMatch(password, confirmPassword)) return res.status(400).json({ message: 'Passwords do not match.' });
+
+    // Clean up any expired unverified accounts first
+    await cleanupExpiredAccounts();
 
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'Email is already in use.' });
@@ -105,7 +120,7 @@ const verifyOtp = async (req:any, res:any) => {
       return res.status(400).json({ message: 'Account is already verified.' });
     }
 
-    if ((user.otpExpires as NativeDate).getTime() < Date.now()) {
+    if (user.otpExpires && user.otpExpires.getTime() < Date.now()) {
       // Delete the expired unverified account
       await User.findByIdAndDelete(user._id);
       return res.status(400).json({ message: 'OTP has expired. Please register again.' });
@@ -115,8 +130,8 @@ const verifyOtp = async (req:any, res:any) => {
       return res.status(400).json({ message: 'Invalid OTP.' });
     }
 
-    user.otp = null;
-    user.otpExpires = null;
+    user.otp = undefined;
+    user.otpExpires = undefined;
     user.isVerified = true;
     await user.save();
 
@@ -169,6 +184,10 @@ const signIn = async (req:any, res:any) => {
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid credentials.' });
+
+    if (!user.password) {
+      return res.status(400).json({ message: 'Please sign in with Google.' });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
