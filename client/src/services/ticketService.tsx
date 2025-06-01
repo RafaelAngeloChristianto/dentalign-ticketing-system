@@ -45,5 +45,21 @@ export const ticketService = {
     }
 
     return response.json();
+  },
+
+  async sendTicketResponse(ticketId: string, responseText: string) {
+    const response = await fetch(`${API_URL}/send_response/${ticketId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ response: responseText }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send ticket response');
+    }
+
+    return response.json();
   }
 }; 

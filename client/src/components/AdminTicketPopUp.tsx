@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, AlertCircle, User, FileText, Settings } from 'lucide-react';
+import { X, Calendar, AlertCircle, User, FileText, Settings, Mail } from 'lucide-react';
 import { PriorityType, StatusType } from "../../../server/models/TicketModel";
 import { ticketService } from '../services/ticketService';
 
@@ -28,6 +28,10 @@ const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket, onUpdate, 
   const [editedAssignee, setEditedAssignee] = useState<string>(ticket.assignee);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [emailResponse, setEmailResponse] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [emailSuccess, setEmailSuccess] = useState('');
 
   React.useEffect(() => {
     setEditedStatus(ticket.status);
@@ -74,6 +78,28 @@ const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket, onUpdate, 
       console.error('Failed to delete ticket:', error);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailResponse.trim()) {
+      setEmailError('Please enter a response message');
+      return;
+    }
+
+    setIsSending(true);
+    setEmailError('');
+    setEmailSuccess('');
+
+    try {
+      await ticketService.sendTicketResponse(ticket.id, emailResponse);
+      setEmailSuccess('Response sent successfully');
+      setEmailResponse('');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send response. Please try again.';
+      setEmailError(errorMessage);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -227,6 +253,49 @@ const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket, onUpdate, 
                   <p className="text-gray-700 leading-relaxed">{ticket.description}</p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Add Email Response Section */}
+          <div className="mt-6 border-t pt-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Mail size={20} />
+              Send Email Response
+            </h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Response Message
+                </label>
+                <textarea
+                  value={emailResponse}
+                  onChange={(e) => setEmailResponse(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  rows={4}
+                  placeholder="Enter your response to the ticket..."
+                />
+              </div>
+
+              {emailError && (
+                <div className="text-red-600 text-sm">{emailError}</div>
+              )}
+
+              {emailSuccess && (
+                <div className="text-green-600 text-sm">{emailSuccess}</div>
+              )}
+
+              <button
+                onClick={handleSendEmail}
+                disabled={isSending}
+                className={`w-full py-2 px-4 rounded-lg text-white font-medium ${
+                  isSending
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-violet-600 hover:bg-violet-700'
+                }`}
+              >
+                {isSending ? 'Sending...' : 'Send Response'}
+              </button>
             </div>
           </div>
         </div>

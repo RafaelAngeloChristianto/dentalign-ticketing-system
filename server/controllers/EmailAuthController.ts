@@ -51,4 +51,52 @@ const userSendMail = (to:string, otp:any, titleTxt:string, _res:Response) => {
     });
 }
 
-export { userSendMail };
+const sendTicketResponseEmail = (to: string, ticketId: string, ticketTitle: string, ticketDescription: string, adminResponse: string) => {
+    let config = {
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASSWORD
+        }
+    }
+
+    let transporter = nodemailer.createTransport(config);
+
+    let mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: to,
+        subject: `Dentalign - Response to Ticket #${ticketId}`,
+        html: `
+            <html>
+                <body style="font-family: Arial, sans-serif; background-color: #e8f0fe; padding: 20px;">
+                    <div style="max-width: 600px; margin: auto; background-color: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h2 style="color: #0072ce;">Response to Your Ticket</h2>
+                        <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+                            <p style="margin: 0;"><strong>Ticket ID:</strong> ${ticketId}</p>
+                            <p style="margin: 5px 0;"><strong>Title:</strong> ${ticketTitle}</p>
+                            <p style="margin: 5px 0;"><strong>Description:</strong> ${ticketDescription}</p>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <h3 style="color: #333;">Admin Response:</h3>
+                            <p style="font-size: 16px; color: #333; white-space: pre-wrap;">${adminResponse}</p>
+                        </div>
+                        <p style="font-size: 14px; color: #555; margin-top: 30px;">
+                            Best regards,<br/>
+                            The Dentalign Team<br/>
+                            Your trusted dental clinic
+                        </p>
+                    </div>
+                </body>
+            </html>
+        `
+    };
+
+    return new Promise((resolve, reject) => {
+        transporter.sendMail(mailOptions, (err, info) => {
+            if (err) reject(err);
+            resolve(info);
+        });
+    });
+}
+
+export { userSendMail, sendTicketResponseEmail };
