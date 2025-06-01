@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService, ApiErrorResponse } from "../api/api";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
+import { GoogleLogin } from "@react-oauth/google";
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const SignUp: React.FC = () => {
     }
 
     try {
-       await authService.signUp({
+      await authService.signUp({
         userName: formData.userName,
         email: formData.email,
         password: formData.password,
@@ -46,7 +47,9 @@ const SignUp: React.FC = () => {
       navigate("/verify-email");
     } catch (err) {
       const error = err as AxiosError<ApiErrorResponse>;
-      setError(error.response?.data?.message || "An error occurred during sign up");
+      setError(
+        error.response?.data?.message || "An error occurred during sign up"
+      );
     } finally {
       setLoading(false);
     }
@@ -55,11 +58,14 @@ const SignUp: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-lg shadow-lg overflow-hidden h-fit sm:scale-75 scale-90">
-
         {/* Left Panel */}
         <div className="w-full md:w-1/2 bg-[#7B4BFF] p-6 sm:p-8 md:p-10 text-white sm:flex hidden flex-col justify-start items-center md:items-start text-center md:text-left ">
           <div className="flex items-center mb-6">
-            <img src="src/assets/tooth_vector.png" alt="Dentalign Logo" className="h-6 sm:h-7 md:h-8 mr-2" />
+            <img
+              src="src/assets/tooth_vector.png"
+              alt="Dentalign Logo"
+              className="h-6 sm:h-7 md:h-8 mr-2"
+            />
             <span className="text-xl sm:text-2xl font-bold">Dentalign</span>
           </div>
 
@@ -68,7 +74,8 @@ const SignUp: React.FC = () => {
               Create Your Dentalign Account
             </h2>
             <p className="text-sm sm:text-base max-w-xs sm:max-w-sm md:max-w-md">
-              Join our support portal to manage your dental alignment journey with ease.
+              Join our support portal to manage your dental alignment journey
+              with ease.
             </p>
           </div>
         </div>
@@ -76,8 +83,12 @@ const SignUp: React.FC = () => {
         {/* Right Panel */}
         <div className="md:w-1/2 w-full p-8 md:p-10 flex flex-col justify-evenly">
           <div>
-            <h2 className="sm:text-4xl text-xl font-semibold text-gray-800 mb-1">Sign Up</h2>
-            <p className="sm:text-lg text-gray-500 mb-6">Create an account to get started</p>
+            <h2 className="sm:text-4xl text-xl font-semibold text-gray-800 mb-1">
+              Sign Up
+            </h2>
+            <p className="sm:text-lg text-gray-500 mb-6">
+              Create an account to get started
+            </p>
           </div>
 
           {error && (
@@ -86,9 +97,14 @@ const SignUp: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6 text-sm sm:text-base md:text-lg">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6 text-sm sm:text-base md:text-lg"
+          >
             <div>
-              <label className="block text-base sm:text-lg md:text-xl font-semibold text-gray-700">Full Name</label>
+              <label className="block text-base sm:text-lg md:text-xl font-semibold text-gray-700">
+                Full Name
+              </label>
               <input
                 type="text"
                 name="userName"
@@ -101,7 +117,9 @@ const SignUp: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-base sm:text-lg md:text-xl font-semibold text-gray-700">Email</label>
+              <label className="block text-base sm:text-lg md:text-xl font-semibold text-gray-700">
+                Email
+              </label>
               <input
                 type="email"
                 name="email"
@@ -114,7 +132,9 @@ const SignUp: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-base sm:text-lg md:text-xl font-semibold text-gray-700">Password</label>
+              <label className="block text-base sm:text-lg md:text-xl font-semibold text-gray-700">
+                Password
+              </label>
               <input
                 type="password"
                 name="password"
@@ -128,7 +148,9 @@ const SignUp: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-base sm:text-lg md:text-xl font-semibold text-gray-700">Confirm Password</label>
+              <label className="block text-base sm:text-lg md:text-xl font-semibold text-gray-700">
+                Confirm Password
+              </label>
               <input
                 type="password"
                 name="confirmPassword"
@@ -151,25 +173,48 @@ const SignUp: React.FC = () => {
 
             <div className="flex items-center my-4 sm:my-6">
               <div className="flex-grow border-t border-gray-300" />
-              <span className="mx-2 sm:mx-3 text-gray-500 text-sm sm:text-base">OR</span>
+              <span className="mx-2 sm:mx-3 text-gray-500 text-sm sm:text-base">
+                OR
+              </span>
               <div className="flex-grow border-t border-gray-300" />
             </div>
 
-            <button
-              type="button"
-              className="w-full border border-gray-300 py-2 sm:py-3 rounded-lg flex items-center justify-center gap-2 sm:gap-3 hover:bg-gray-100 cursor-pointer"
-            >
-              <img
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                alt="Google"
-                className="h-5 w-5 sm:h-6 sm:w-6"
-              />
-              Continue with Google
-            </button>
+            {/* <button
+                type="button"
+                className="w-full border border-gray-300 py-2 sm:py-3 rounded-lg flex items-center justify-center gap-2 sm:gap-3 hover:bg-gray-100 cursor-pointer"
+              >
+                <img
+                  src="https://www.svgrepo.com/show/475656/google-color.svg"
+                  alt="Google"
+                  className="h-5 w-5 sm:h-6 sm:w-6"
+                />
+                Continue with Google
+              </button> */}
+
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                console.log("Credential:", credentialResponse);
+                try {
+                  const { data } = await axios.post("/api/auth/google", {
+                    token: credentialResponse.credential,
+                  });
+                  localStorage.setItem("token", data.token);
+                  navigate("/tickets");
+                } catch (error) {
+                  setError("Google sign-in failed.");
+                }
+              }}
+              onError={() => {
+                setError("Google sign-in was unsuccessful. Try again later.");
+              }}
+            />
 
             <p className="text-sm sm:text-base text-center mt-4 sm:mt-6 text-gray-600">
               Already have an account?{" "}
-              <a href="/signin" className="text-violet-600 font-semibold hover:underline">
+              <a
+                href="/signin"
+                className="text-violet-600 font-semibold hover:underline"
+              >
                 Sign in
               </a>
             </p>

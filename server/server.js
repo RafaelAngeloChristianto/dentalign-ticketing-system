@@ -10,6 +10,7 @@ const dotenv = require('dotenv');
 const { connectToMongo } = require('./config/mongoClient');
 const usersRoute = require('./routes/userRoutes');
 const cors = require('cors');
+const authRoutes = require('./routes/authRoutes');
 
 dotenv.config();
 
@@ -30,7 +31,8 @@ app.get('/', (req, res) => {
   res.send('Server is working!');
 });
 
-// Start server
+app.use('/api/auth', authRoutes);  // Ensures /api/auth/google works
+// Start server 
 app.listen(PORT, async () => {
   try {
     await connectToMongo();
