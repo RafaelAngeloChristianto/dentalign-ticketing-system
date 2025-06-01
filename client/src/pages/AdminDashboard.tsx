@@ -1,64 +1,77 @@
-import React from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import DashboardHeader from '../components/DashboardHeader';
 import DashboardNav from '../components/DashboardNav';
+import type { ITicket, StatusType } from '../../../server/models/TicketModel';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ticketService } from '../services/ticketService';
 import AdminTable from '../components/AdminTable';
-import { Ticket } from '../../../server/models/TicketModel';
-import { useNavigate } from 'react-router-dom';
+
+interface NavOption {
+  option: string;
+  func: () => void | Promise<void>;
+  status?: StatusType | 'all' | null;
+}
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const tickets: Ticket[] = [
-    {
-      id: "DENT-1001",
-      title: "Patient Records System Error",
-      assignee: "Dr Cindy",
-      type: "IT System",
-      dateCreated: "30/04/2025",
-      priority: "Low",
-      status: "In Progress",
-    },
-    {
-      id: "DENT-1002",
-      title: "Patient Records System Error",
-      assignee: "Dr Cindy",
-      type: "IT System",
-      dateCreated: "30/04/2025",
-      priority: "High",
-      status: "In Progress",
-    },
-    {
-      id: "DENT-1003",
-      title: "Patient Records System Error",
-      assignee: "Dr Cindy",
-      type: "IT System",
-      dateCreated: "30/04/2025",
-      priority: "High",
-      status: "In Progress",
-    },
-  ];
+  const { status: statusParam } = useParams<{ status?: StatusType | 'all' }>();
+  const [tickets, setTickets] = useState<ITicket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentStatusFilter, setCurrentStatusFilter] = useState<StatusType | 'all' | null>(statusParam || 'all');
 
-  const navOptions = [
+  const fetchTickets = useCallback(async (statusFilter: StatusType | 'all' | null = 'all') => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await ticketService.getAllTickets();
+      console.log('Fetched tickets:', data); // Log fetched data
+
+      if (statusFilter === 'all') {
+        setTickets(data);
+      } else {
+        setTickets(data.filter(ticket => ticket.status === statusFilter));
+      }
+      setCurrentStatusFilter(statusFilter);
+      setLoading(false);
+    } catch (error) {
+      setError('Failed to fetch tickets');
+      setLoading(false);
+      console.error('Error fetching tickets:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTickets(statusParam || 'all');
+  }, [fetchTickets, statusParam]);
+
+  const navOptions: NavOption[] = [
     {
       option: "Summary",
-      func: () => navigate('/admin/summary')
+      func: () => navigate('/admin/summary'),
+      status: null,
     },
     {
       option: "All Tickets",
-      func: () => console.log("Hello!")
+      func: () => fetchTickets('all'),
+      status: 'all',
+    },
+    {
+      option: "Unseen",
+      func: () => fetchTickets('Unseen'),
+      status: 'Unseen',
     },
     {
       option: "In Progress",
-      func: () => console.log("Hello!")
+      func: () => fetchTickets('In Progress'),
+      status: 'In Progress',
     },
     {
       option: "Completed",
-      func: () => console.log("Hello!")
-    },
-    {
-      option: "Ticket History",
-      func: () => console.log("Hello!")
+      func: () => fetchTickets('Completed'),
+      status: 'Completed',
     },
   ];
 
@@ -82,14 +95,22 @@ function AdminDashboard() {
     search_mobile_wrapper: 'flex flex-row items-center gap-2 sm:contents',
   };
 
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center min-h-screen text-red-500">{error}</div>;
+  }
+
   return (
     <>
       <main className={styles.main}>
         <DashboardHeader isAdmin={true} />
-     <div className="absolute top-4 right-4 md:static md:top-auto md:right-auto">
-  <DashboardNav navs={navOptions} />
-</div>
-
+        <div className="absolute top-4 right-4 md:static md:top-auto md:right-auto">
+          {/* Pass currentStatusFilter to highlight the active filter */}
+          <DashboardNav navs={navOptions} currentFilter={currentStatusFilter} />
+        </div>
 
         <section className={styles.search}>
           {/* Mobile layout */}
@@ -129,7 +150,7 @@ function AdminDashboard() {
         </section>
         
         <div className="overflow-x-auto">
-          <AdminTable data={tickets} />
+          <AdminTable data={tickets} onRefresh={fetchTickets} />
         </div>
       </main>
     </>

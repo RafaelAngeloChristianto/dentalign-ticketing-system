@@ -1,3 +1,4 @@
+import React from 'react';
 import { Routes, Route } from 'react-router-dom'
 
 import Home from './pages/Home'
@@ -21,7 +22,7 @@ function App() {
       <Route path='/articles' element={<Articles />} />
       <Route path='/contact' element={<Contact />} />
       <Route path='/tickets' element={<CustStaffDashboard />} />
-      <Route path='/admin' element={<AdminDashboard />} />
+      <Route path='/admin/:status?' element={<AdminDashboard />} />
       <Route path='/admin/summary' element={<AdminDashboardSummary />} />
       <Route path='/signin' element={<SignIn/>}/>
       <Route path='/signup' element={<SignUp/>}/>

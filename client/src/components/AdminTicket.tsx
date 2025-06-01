@@ -1,20 +1,26 @@
 import React, { useState } from "react";
-import { PriorityType, StatusType } from "../../../server/models/TicketModel";
+import { PriorityType, StatusType, ITicket } from "../../../server/models/TicketModel";
 import PriorityDisplay from "./PriorityDisplay";
 import StatusDisplay from "./StatusDisplay";
 import AdminTicketPopup from "./AdminTicketPopUp";
+import { ticketService } from "../services/ticketService";
 
-interface Props { 
-  id          : string
-  title       : string
-  assignee    : string
-  type        : string
-  dateCreated : string
-  priority    : PriorityType
-  status      : StatusType
-};
+interface Props extends ITicket {
+  onTicketUpdate?: () => void;
+}
 
-const AdminTicket: React.FC<Props> = ({ id, title, assignee, type, dateCreated, priority, status }) => {
+const AdminTicket: React.FC<Props> = ({
+  ticket_id,
+  owner_id,
+  title,
+  description,
+  assignee,
+  type,
+  date_created,
+  priority,
+  status,
+  onTicketUpdate,
+}) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const styles = {
@@ -27,6 +33,20 @@ const AdminTicket: React.FC<Props> = ({ id, title, assignee, type, dateCreated, 
     setIsPopupOpen(prev => !prev);
   };
 
+  const handleTicketUpdate = async (ticketId: string, updates: { status?: StatusType; priority?: PriorityType }) => {
+    await ticketService.updateTicket(ticketId, updates);
+    if (onTicketUpdate) {
+      onTicketUpdate();
+    }
+  };
+
+  const handleTicketDelete = async (ticketId: string) => {
+    await ticketService.deleteTicket(ticketId);
+    if (onTicketUpdate) {
+      onTicketUpdate();
+    }
+  };
+
   return (
     <>
       <tr 
@@ -35,11 +55,11 @@ const AdminTicket: React.FC<Props> = ({ id, title, assignee, type, dateCreated, 
         role="button"
         tabIndex={0}
       >
-        <td className={styles.cell}>{id}</td>
+        <td className={styles.cell}>{ticket_id}</td>
         <td className={styles.titleCell} title={title}>{title}</td>
         <td className={styles.cell}>{assignee}</td>
         <td className={styles.cell}>{type}</td>
-        <td className={styles.cell}>{dateCreated}</td>
+        <td className={styles.cell}>{new Date(date_created).toLocaleDateString()}</td>
         <td className={styles.cell}>
           <PriorityDisplay priority={priority} />
         </td>
@@ -53,14 +73,18 @@ const AdminTicket: React.FC<Props> = ({ id, title, assignee, type, dateCreated, 
           isOpen={isPopupOpen}
           onClose={() => setIsPopupOpen(false)}
           ticket={{
-            id,
-            title,
-            assignee,
-            type,
-            dateCreated,
-            priority,
-            status
+            id: ticket_id,
+            ownerId: owner_id.toString(),
+            title: title,
+            description: description,
+            assignee: assignee,
+            type: type,
+            dateCreated: new Date(date_created).toLocaleDateString(),
+            priority: priority,
+            status: status,
           }}
+          onUpdate={handleTicketUpdate}
+          onDelete={handleTicketDelete}
         />
       )}
     </>

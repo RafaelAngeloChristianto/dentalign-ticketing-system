@@ -1,12 +1,13 @@
 import React from "react";
 import AdminTicket from "./AdminTicket";
-import { Ticket } from "../../../server/models/TicketModel";
+import { ITicket } from "../../../server/models/TicketModel";
 
 interface Props {
-  data: Ticket[]
+  data: ITicket[];
+  onRefresh?: () => void;
 }
 
-const AdminTable:React.FC<Props> = ({ data }) => {
+const AdminTable: React.FC<Props> = ({ data, onRefresh }) => {
 
   const tickets = data 
 
@@ -33,7 +34,19 @@ const AdminTable:React.FC<Props> = ({ data }) => {
         </thead>
         <tbody>
           {tickets.map((ticket) => (
-            <AdminTicket key={ticket.id} {...ticket} />
+            <AdminTicket
+              key={ticket.ticket_id}
+              ticket_id={ticket.ticket_id}
+              owner_id={ticket.owner_id}
+              title={ticket.title}
+              description={ticket.description}
+              assignee={ticket.assignee}
+              type={ticket.type}
+              date_created={ticket.date_created}
+              priority={ticket.priority}
+              status={ticket.status}
+              onTicketUpdate={onRefresh}
+            />
           ))}
         </tbody>
       </table>

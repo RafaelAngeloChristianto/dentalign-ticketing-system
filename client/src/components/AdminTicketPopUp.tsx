@@ -1,26 +1,75 @@
 import React, { useState } from 'react';
 import { X, Calendar, AlertCircle, User, FileText, Settings } from 'lucide-react';
 import { PriorityType, StatusType } from "../../../server/models/TicketModel";
-import PriorityDisplay from "./PriorityDisplay";
-import StatusDisplay from "./StatusDisplay";
+import { ticketService } from '../services/ticketService';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   ticket: {
     id: string;
+    ownerId: string;
     title: string;
+    description: string;
     assignee: string;
     type: string;
     dateCreated: string;
     priority: PriorityType;
     status: StatusType;
   };
+  onUpdate?: (ticketId: string, updates: { status?: StatusType; priority?: PriorityType }) => Promise<void>;
+  onDelete?: (ticketId: string) => Promise<void>;
 }
 
-const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket }) => {
-  // Removed local state and hardcoded data
-  
+const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket, onUpdate, onDelete }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedStatus, setEditedStatus] = useState<StatusType>(ticket.status);
+  const [editedPriority, setEditedPriority] = useState<PriorityType>(ticket.priority);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleSave = async () => {
+    setIsUpdating(true);
+    try {
+      if (onUpdate) {
+        await onUpdate(ticket.id, {
+          status: editedStatus,
+          priority: editedPriority
+        });
+      } else {
+        await ticketService.updateTicket(ticket.id, {
+          status: editedStatus,
+          priority: editedPriority
+        });
+      }
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to update ticket:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this ticket?')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      if (onDelete) {
+        await onDelete(ticket.id);
+      } else {
+        await ticketService.deleteTicket(ticket.id);
+      }
+      onClose();
+    } catch (error) {
+      console.error('Failed to delete ticket:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const getPriorityColor = (priority: PriorityType) => {
     switch (priority.toLowerCase()) {
       case 'high': return 'bg-red-100 text-red-700 border-red-200';
@@ -34,7 +83,7 @@ const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket }) => {
     switch (status.toLowerCase()) {
       case 'in progress': return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'completed': return 'bg-green-100 text-green-700 border-green-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'unseen': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
@@ -84,12 +133,37 @@ const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket }) => {
               Condition
             </h3>
             <div className="flex gap-3">
-              <div className={`px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(ticket.priority)}`}>
-                Priority: {ticket.priority}
-              </div>
-              <div className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(ticket.status)}`}>
-                Status: {ticket.status}
-              </div>
+              {isEditing ? (
+                <>
+                  <select
+                    value={editedPriority}
+                    onChange={(e) => setEditedPriority(e.target.value as PriorityType)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(editedPriority)}`}
+                  >
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </select>
+                  <select
+                    value={editedStatus}
+                    onChange={(e) => setEditedStatus(e.target.value as StatusType)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(editedStatus)}`}
+                  >
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Unseen">Unseen</option>
+                  </select>
+                </>
+              ) : (
+                <>
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(ticket.priority)}`}>
+                    Priority: {ticket.priority}
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(ticket.status)}`}>
+                    Status: {ticket.status}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -108,7 +182,13 @@ const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket }) => {
                   </span>
                   <p className="text-gray-900 font-medium">{ticket.id}</p>
                 </div>
-                {/* Assuming userId is not in the current ticket data */}
+                <div>
+                  <span className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">
+                    <User size={12} />
+                    Owner ID
+                  </span>
+                  <p className="text-gray-900 font-medium">{ticket.ownerId}</p>
+                </div>
                 <div>
                   <span className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">
                     <User size={12} />
@@ -127,9 +207,8 @@ const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket }) => {
               
               <div>
                 <span className="text-xs text-gray-500 uppercase tracking-wide block mb-2">Description</span>
-                 {/* Assuming description is not in the current ticket data, using title for now */}
                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                  <p className="text-gray-700 leading-relaxed">{ticket.title}</p>
+                  <p className="text-gray-700 leading-relaxed">{ticket.description}</p>
                 </div>
               </div>
             </div>
@@ -144,11 +223,37 @@ const AdminTicketPopUp: React.FC<Props> = ({ isOpen, onClose, ticket }) => {
           >
             Cancel
           </button>
-          <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">
-            Edit
-          </button>
-          <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm">
-            Delete
+          {isEditing ? (
+            <>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                disabled={isUpdating}
+              >
+                Cancel Edit
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm disabled:opacity-50"
+                disabled={isUpdating}
+              >
+                {isUpdating ? 'Saving...' : 'Save Changes'}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+            >
+              Edit
+            </button>
+          )}
+          <button
+            onClick={handleDelete}
+            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm disabled:opacity-50"
+            disabled={isDeleting}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </button>
         </div>
       </div>
