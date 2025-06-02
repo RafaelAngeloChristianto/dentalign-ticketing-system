@@ -5,6 +5,7 @@ import cors from 'cors'
 import { connectToMongo } from './config/mongoClient'
 import usersRoute from './routes/userRoutes'
 import ticketRoute from './routes/TicketRoutes'
+import { errorHandler } from './middleware/errorHandler'
 
 // <<<<<<< HEAD:server/server.js
 // const express = require('express');
@@ -26,13 +27,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Allow requests from React frontend
+// Middleware
 app.use(cors({
   origin: 'http://localhost:5173',
-  credentials: true // if you're using cookies or auth headers
+  credentials: true
 }));
 app.use(express.json());
 
+// Routes
 app.use('/service/user', usersRoute);
 app.use('/service/tickets', ticketRoute);
 
@@ -40,6 +42,9 @@ app.use('/service/tickets', ticketRoute);
 app.get('/', (_req, res) => {
   res.send('Server is working!');
 });
+
+// Error handling middleware (should be last)
+app.use(errorHandler);
 
 // Start server 
 app.listen(PORT, async () => {
