@@ -5,7 +5,6 @@ import cors from 'cors'
 import { connectToMongo } from './config/mongoClient'
 import usersRoute from './routes/userRoutes'
 import ticketRoute from './routes/TicketRoutes'
-import { errorHandler } from './middleware/errorHandler'
 
 // <<<<<<< HEAD:server/server.js
 // const express = require('express');
@@ -43,8 +42,6 @@ app.get('/', (_req, res) => {
   res.send('Server is working!');
 });
 
-// Error handling middleware (should be last)
-app.use(errorHandler);
 
 // Start server 
 app.listen(PORT, async () => {
