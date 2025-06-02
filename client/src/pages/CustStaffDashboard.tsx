@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Search, Filter, User, Calendar, ArrowLeft, Plus, Menu, X } from 'lucide-react';
 import DashboardHeader from '../components/DashboardHeader';
 import { ticketService } from '../api/api';
+import { useNavigate } from "react-router-dom";
 
 interface Ticket {
   id: string;
@@ -38,6 +39,8 @@ const CustomerDashboard = () => {
   const [showPriorityFilterDropdown, setShowPriorityFilterDropdown] = useState(false);
   const [selectedPriorityFilter, setSelectedPriorityFilter] = useState<string | null>(null);
   const [showCreateTicketModal, setShowCreateTicketModal] = useState(false);
+
+  const navigate = useNavigate();
 
   const tabs = ['All Tickets', 'Unseen', 'In Progress', 'Completed'];
 
@@ -133,6 +136,7 @@ const CustomerDashboard = () => {
   const handleCreateTicket = () => {
     // TODO: Implement create ticket functionality
     setShowCreateTicketModal(true);
+    navigate("/createticket");
   };
 
   return (

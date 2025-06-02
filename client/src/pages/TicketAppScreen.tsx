@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { ticketService } from "../api/api";
 import "./TicketAppScreen.css";
+import { useNavigate } from "react-router-dom";
+
 
 interface TicketAppScreenProps {
   ownerId: string;
@@ -9,12 +11,13 @@ interface TicketAppScreenProps {
 const TicketAppScreen: React.FC<TicketAppScreenProps> = ({ ownerId }) => {
   console.log("Owner ID:", ownerId);
   const [title, setTitle] = useState("");
-  const [type, setType] = useState("");
+  const [type, setType] = useState<"IT System" | "Management">("IT System");
   const [description, setDescription] = useState("");
+  const navigate = useNavigate();
 
   const assignee = "support-team";
   const priority = "Medium";
-  const status = "Open";
+  const status = "Unseen";
   const date_created = new Date().toISOString();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +34,7 @@ const TicketAppScreen: React.FC<TicketAppScreenProps> = ({ ownerId }) => {
       });
       alert("Ticket created: " + response.message);
       setTitle("");
-      setType("");
+      setType("IT System");
       setDescription("");
     } catch (err: any) {
       console.error(err);
@@ -71,11 +74,9 @@ const TicketAppScreen: React.FC<TicketAppScreenProps> = ({ ownerId }) => {
             />
 
             <label htmlFor="type">Type</label>
-            <select value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="">Select an option</option>
-              <option value="Technical Support">Technical Support</option>
-              <option value="Clinic Facilities">Clinic Facilities</option>
-              <option value="Operational and Administration">Operational and Administration</option>
+            <select value={type} onChange={(e) => setType(e.target.value as "IT System" | "Management")}>
+              <option value="IT System">IT System</option>
+              <option value="Management">Management</option>
             </select>
 
             <label htmlFor="desc">Description</label>
@@ -91,8 +92,9 @@ const TicketAppScreen: React.FC<TicketAppScreenProps> = ({ ownerId }) => {
                 className="cancel_btn"
                 onClick={() => {
                   setTitle("");
-                  setType("");
+                  setType("IT System");
                   setDescription("");
+                  navigate("/tickets");
                 }}
               >
                 Cancel
