@@ -12,8 +12,11 @@ import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import CustStaffDashboard from './pages/CustStaffDashboard'
 import OTPVerification from './pages/OTPVerification'
+import TicketAppScreen from './pages/TicketAppScreen';
 
 function App() {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const ownerId = user.id;
   return (
     <Routes>
       <Route path='/' element={<Home />} />
@@ -22,6 +25,7 @@ function App() {
       <Route path='/articles' element={<Articles />} />
       <Route path='/contact' element={<Contact />} />
       <Route path='/tickets' element={<CustStaffDashboard />} />
+      <Route path='/createticket' element={<TicketAppScreen ownerId={"683d81339a95af509b7e3bb3"} />} />
       <Route path='/admin/:status?' element={<AdminDashboard />} />
       <Route path='/admin/summary' element={<AdminDashboardSummary />} />
       <Route path='/signin' element={<SignIn/>}/>
@@ -30,5 +34,4 @@ function App() {
     </Routes>
   )
 }
-console.log("Google Client ID:", import.meta.env.VITE_GOOGLE_CLIENT_ID);
 export default App

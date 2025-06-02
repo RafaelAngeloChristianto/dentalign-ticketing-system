@@ -43,10 +43,13 @@ const SignIn: React.FC = () => {
       // Store token in localStorage if remember me is checked
       if (formData.rememberMe) {
         localStorage.setItem("token", response.token);
+        localStorage.setItem("user", JSON.stringify(response.user));
       } else {
         sessionStorage.setItem("token", response.token);
+        sessionStorage.setItem("user", JSON.stringify(response.user));
       }
-
+      
+      console.log("User ID:", response.user.id);
       // Redirect based on user role
       if (response.user.role === "admin") {
         navigate("/admin");

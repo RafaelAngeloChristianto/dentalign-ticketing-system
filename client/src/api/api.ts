@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_URL = 'http://localhost:3000/service/user';
+const API_URL_TICKET = 'http://localhost:3000/service/tickets';
 
 export interface ApiErrorResponse {
   message: string;
@@ -10,6 +11,13 @@ export interface ApiErrorResponse {
 
 const api = axios.create({
   baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+const api_ticket = axios.create({
+  baseURL: API_URL_TICKET,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -44,6 +52,25 @@ export const authService = {
     const response = await api.post('/resend-otp', { email });
     return response.data;
   },
+  
 };
 
+// api.ts
+export const ticketService = {
+  createTicket: async (
+    ownerId: string,
+    ticketData: {
+      title: string;
+      description: string;
+      assignee: string;
+      type: string;
+      date_created: string;
+      priority: string;
+      status: string;
+    }
+  ) => {
+    const response = await api_ticket.post(`/create_ticket/${ownerId}`, ticketData);
+    return response.data;
+  }
+};
 export default api; 
