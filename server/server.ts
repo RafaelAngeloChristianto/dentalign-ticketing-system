@@ -5,7 +5,6 @@ import cors from 'cors'
 import { connectToMongo } from './config/mongoClient'
 import usersRoute from './routes/userRoutes'
 import ticketRoute from './routes/TicketRoutes'
-import authRoutes from './routes/authRoutes'
 
 // <<<<<<< HEAD:server/server.js
 // const express = require('express');
@@ -42,7 +41,6 @@ app.get('/', (_req, res) => {
   res.send('Server is working!');
 });
 
-app.use('/api/auth', authRoutes);  // Ensures /api/auth/google works
 // Start server 
 app.listen(PORT, async () => {
   try {
