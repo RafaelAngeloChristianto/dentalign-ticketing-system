@@ -16,7 +16,7 @@ import TicketAppScreen from './pages/TicketAppScreen';
 
 function App() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const ownerId = user.id;
+  const ownerId = user?.id || null;
   return (
     <Routes>
       <Route path='/' element={<Home />} />
@@ -25,7 +25,7 @@ function App() {
       <Route path='/articles' element={<Articles />} />
       <Route path='/contact' element={<Contact />} />
       <Route path='/tickets' element={<CustStaffDashboard />} />
-      <Route path='/createticket' element={<TicketAppScreen ownerId={"683d81339a95af509b7e3bb3"} />} />
+      <Route path='/createticket' element={<TicketAppScreen ownerId={ownerId} />} />
       <Route path='/admin/:status?' element={<AdminDashboard />} />
       <Route path='/admin/summary' element={<AdminDashboardSummary />} />
       <Route path='/signin' element={<SignIn/>}/>
