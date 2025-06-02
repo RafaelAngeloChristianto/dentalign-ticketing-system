@@ -18,6 +18,11 @@ export interface CreateTicketPayload {
   status: "In Progress" | "Completed" | "Unseen"; // Use specific types
 }
 
+export interface TicketUpdatePayload {
+  status?: "In Progress" | "Completed" | "Unseen";
+  priority?: "High" | "Medium" | "Low";
+}
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -57,14 +62,35 @@ export const authService = {
 };
 
 export const ticketService = {
+  getAllTickets: async () => {
+    const response = await api.get('/service/tickets/get_tickets_all');
+    return response.data;
+  },
+
   getTicketsByOwnerId: async (ownerId: string) => {
     const response = await api.get(`/service/tickets/get_tickets_byOwnerId/${ownerId}`);
     return response.data;
   },
+
   createTicket: async (ownerId: string, ticketData: CreateTicketPayload) => {
     const response = await api.post(`/service/tickets/create_ticket/${ownerId}`, ticketData);
     return response.data;
   },
+
+  updateTicket: async (ticketId: string, updates: TicketUpdatePayload) => {
+    const response = await api.patch(`/service/tickets/update_status/${ticketId}`, updates);
+    return response.data;
+  },
+
+  deleteTicket: async (ticketId: string) => {
+    const response = await api.delete(`/service/tickets/delete_ticket/${ticketId}`);
+    return response.data;
+  },
+
+  sendTicketResponse: async (ticketId: string, responseText: string) => {
+    const response = await api.post(`/service/tickets/send_response/${ticketId}`, { response: responseText });
+    return response.data;
+  }
 };
 
 export default api; 

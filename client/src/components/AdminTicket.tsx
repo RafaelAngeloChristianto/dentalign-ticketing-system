@@ -3,7 +3,7 @@ import { PriorityType, StatusType, ITicket } from "../../../server/models/Ticket
 import PriorityDisplay from "./PriorityDisplay";
 import StatusDisplay from "./StatusDisplay";
 import AdminTicketPopup from "./AdminTicketPopUp";
-import { ticketService } from "../services/ticketService";
+import { ticketService } from "../api/api";
 
 interface Props extends ITicket {
   onTicketUpdate?: () => void;

@@ -4,7 +4,7 @@ import { AlertCircle, CheckCircle, Clock, Users, TrendingUp, Calendar } from 'lu
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '../components/DashboardHeader';
 import DashboardNav from '../components/DashboardNav';
-import { ticketService } from '../services/ticketService';
+import { ticketService } from '../api/api';
 import type { ITicket, StatusType } from '../../../server/models/TicketModel';
 
 interface CustomTooltipProps {
