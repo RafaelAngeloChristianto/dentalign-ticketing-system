@@ -42,7 +42,6 @@ app.get('/', (_req, res) => {
   res.send('Server is working!');
 });
 
-
 // Start server 
 app.listen(PORT, async () => {
   try {
