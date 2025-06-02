@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/service/user';
+const API_BASE_URL = 'http://localhost:3000';
 
 export interface ApiErrorResponse {
   message: string;
@@ -8,8 +8,18 @@ export interface ApiErrorResponse {
   email?: string;
 }
 
+export interface CreateTicketPayload {
+  title: string;
+  description: string;
+  assignee: string;
+  type: "IT System" | "Management"; // Use specific types based on backend
+  date_created: string; // Send date as ISO string
+  priority: "High" | "Medium" | "Low"; // Use specific types
+  status: "In Progress" | "Completed" | "Unseen"; // Use specific types
+}
+
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -23,7 +33,7 @@ export const authService = {
     confirmPassword: string;
     phoneNumber?: string;
   }) => {
-    const response = await api.post('/signup', userData);
+    const response = await api.post('/api/user/signup', userData);
     return response.data;
   },
 
@@ -31,17 +41,28 @@ export const authService = {
     email: string;
     password: string;
   }) => {
-    const response = await api.post('/signin', credentials);
+    const response = await api.post('/api/user/signin', credentials);
     return response.data;
   },
 
   verifyOtp: async (email: string, otp: string) => {
-    const response = await api.post('/verify-otp', { email, otp });
+    const response = await api.post('/api/user/verify-otp', { email, otp });
     return response.data;
   },
 
   resendOtp: async (email: string) => {
-    const response = await api.post('/resend-otp', { email });
+    const response = await api.post('/api/user/resend-otp', { email });
+    return response.data;
+  },
+};
+
+export const ticketService = {
+  getTicketsByOwnerId: async (ownerId: string) => {
+    const response = await api.get(`/service/tickets/get_tickets_byOwnerId/${ownerId}`);
+    return response.data;
+  },
+  createTicket: async (ownerId: string, ticketData: CreateTicketPayload) => {
+    const response = await api.post(`/service/tickets/create_ticket/${ownerId}`, ticketData);
     return response.data;
   },
 };
