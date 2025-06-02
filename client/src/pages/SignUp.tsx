@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService, ApiErrorResponse } from "../api/api";
 import axios, { AxiosError } from "axios";
-import { GoogleLogin } from "@react-oauth/google";
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -179,7 +178,7 @@ const SignUp: React.FC = () => {
               <div className="flex-grow border-t border-gray-300" />
             </div>
 
-            {/* <button
+            <button
                 type="button"
                 className="w-full border border-gray-300 py-2 sm:py-3 rounded-lg flex items-center justify-center gap-2 sm:gap-3 hover:bg-gray-100 cursor-pointer"
               >
@@ -189,25 +188,7 @@ const SignUp: React.FC = () => {
                   className="h-5 w-5 sm:h-6 sm:w-6"
                 />
                 Continue with Google
-              </button> */}
-
-            <GoogleLogin
-              onSuccess={async (credentialResponse) => {
-                console.log("Credential:", credentialResponse);
-                try {
-                  const { data } = await axios.post("/api/auth/google", {
-                    token: credentialResponse.credential,
-                  });
-                  localStorage.setItem("token", data.token);
-                  navigate("/tickets");
-                } catch (error) {
-                  setError("Google sign-in failed.");
-                }
-              }}
-              onError={() => {
-                setError("Google sign-in was unsuccessful. Try again later.");
-              }}
-            />
+              </button> 
 
             <p className="text-sm sm:text-base text-center mt-4 sm:mt-6 text-gray-600">
               Already have an account?{" "}

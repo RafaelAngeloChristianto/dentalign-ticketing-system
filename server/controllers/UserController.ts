@@ -120,7 +120,7 @@ const verifyOtp = async (req:any, res:any) => {
       return res.status(400).json({ message: 'Account is already verified.' });
     }
 
-    if (user.otpExpires && user.otpExpires.getTime() < Date.now()) {
+    if ((user.otpExpires as NativeDate).getTime() < Date.now()) {
       // Delete the expired unverified account
       await User.findByIdAndDelete(user._id);
       return res.status(400).json({ message: 'OTP has expired. Please register again.' });
@@ -130,8 +130,8 @@ const verifyOtp = async (req:any, res:any) => {
       return res.status(400).json({ message: 'Invalid OTP.' });
     }
 
-    user.otp = undefined;
-    user.otpExpires = undefined;
+    user.otp = null;
+    user.otpExpires = null;
     user.isVerified = true;
     await user.save();
 
@@ -184,10 +184,6 @@ const signIn = async (req:any, res:any) => {
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid credentials.' });
-
-    if (!user.password) {
-      return res.status(400).json({ message: 'Please sign in with Google.' });
-    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
