@@ -1,16 +1,18 @@
 import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
+import type { StatusType } from '../../../server/models/TicketModel';
 
 interface Props {
     navs: {
-        option: string
-        func: () => void
-    }[]
+        option: string;
+        func: () => void | Promise<void>;
+        status?: StatusType | 'all' | null | 'summary';
+    }[];
+    currentFilter: StatusType | 'all' | null | 'summary';
 }
 
-const DashboardNav:React.FC<Props> = ({ navs }) => {
-    const [current, setCurrent] = useState(0)
+const DashboardNav:React.FC<Props> = ({ navs, currentFilter }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     const styles = {
@@ -24,8 +26,7 @@ const DashboardNav:React.FC<Props> = ({ navs }) => {
         mobileSelected: 'bg-indigo-50 text-indigo-500'
     }
 
-    const onClick = (id: number, func:()=>void) => {
-        setCurrent(id)
+    const onClick = (func: () => void | Promise<void>) => {
         if(func) func()
         setIsMobileMenuOpen(false)
     }
@@ -45,8 +46,8 @@ const DashboardNav:React.FC<Props> = ({ navs }) => {
                 {navs.map((nav, i) => 
                     <button 
                         key={i}
-                        className={styles.navItem + (i === current ? " " + styles.selected : "")} 
-                        onClick={() => onClick(i, nav.func)}
+                        className={styles.navItem + (nav.status === currentFilter ? " " + styles.selected : "")} 
+                        onClick={() => onClick(nav.func)}
                     >
                         {nav.option}
                     </button>
@@ -59,8 +60,8 @@ const DashboardNav:React.FC<Props> = ({ navs }) => {
                     {navs.map((nav, i) => 
                         <button 
                             key={i}
-                            className={styles.mobileNavItem + (i === current ? " " + styles.mobileSelected : "")} 
-                            onClick={() => onClick(i, nav.func)}
+                            className={styles.mobileNavItem + (nav.status === currentFilter ? " " + styles.mobileSelected : "")} 
+                            onClick={() => onClick(nav.func)}
                         >
                             {nav.option}
                         </button>

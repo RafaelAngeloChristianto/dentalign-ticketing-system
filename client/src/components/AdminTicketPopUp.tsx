@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Calendar, AlertCircle, User, FileText, Settings, Mail } from 'lucide-react';
 import { PriorityType, StatusType } from "../../../server/models/TicketModel";
-import { ticketService } from '../services/ticketService';
+import { ticketService } from '../api/api';
 
 interface Props {
   isOpen: boolean;

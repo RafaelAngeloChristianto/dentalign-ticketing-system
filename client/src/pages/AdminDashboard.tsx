@@ -5,7 +5,7 @@ import DashboardHeader from '../components/DashboardHeader';
 import DashboardNav from '../components/DashboardNav';
 import type { ITicket, StatusType, PriorityType } from '../../../server/models/TicketModel';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ticketService } from '../services/ticketService';
+import { ticketService } from '../api/api';
 import AdminTable from '../components/AdminTable';
 
 interface NavOption {
