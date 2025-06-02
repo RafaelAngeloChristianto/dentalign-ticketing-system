@@ -38,7 +38,7 @@ export const authService = {
     confirmPassword: string;
     phoneNumber?: string;
   }) => {
-    const response = await api.post('/api/user/signup', userData);
+    const response = await api.post('/service/user/signup', userData);
     return response.data;
   },
 
@@ -46,17 +46,17 @@ export const authService = {
     email: string;
     password: string;
   }) => {
-    const response = await api.post('/api/user/signin', credentials);
+    const response = await api.post('/service/user/signin', credentials);
     return response.data;
   },
 
   verifyOtp: async (email: string, otp: string) => {
-    const response = await api.post('/api/user/verify-otp', { email, otp });
+    const response = await api.post('/service/user/verify-otp', { email, otp });
     return response.data;
   },
 
   resendOtp: async (email: string) => {
-    const response = await api.post('/api/user/resend-otp', { email });
+    const response = await api.post('/service/user/resend-otp', { email });
     return response.data;
   },
 };
